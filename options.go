@@ -7,20 +7,13 @@ import (
 	"go.unistack.org/micro/v3/broker"
 	"go.unistack.org/micro/v3/logger"
 	"go.unistack.org/micro/v3/meter"
-	"go.unistack.org/micro/v3/store"
 	"go.unistack.org/micro/v3/tracer"
 )
 
 type configKey struct{}
 
-func Config(c *redis.Options) store.Option {
-	return store.SetOption(configKey{}, c)
-}
-
-type clusterConfigKey struct{}
-
-func ClusterConfig(c *redis.ClusterOptions) store.Option {
-	return store.SetOption(clusterConfigKey{}, c)
+func Config(c *redis.UniversalOptions) broker.Option {
+	return broker.SetOption(configKey{}, c)
 }
 
 var (
