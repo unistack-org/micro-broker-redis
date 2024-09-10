@@ -1,8 +1,9 @@
 module go.unistack.org/micro-broker-redis/v3
 
-go 1.23.1
+go 1.22
 
 require (
+	github.com/redis/go-redis/extra/rediscmd/v9 v9.5.3
 	github.com/redis/go-redis/v9 v9.6.1
 	go.unistack.org/micro/v3 v3.10.84
 )

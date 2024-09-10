@@ -13,10 +13,6 @@ var (
 	PoolConnTotalCurrent = "pool_conn_total_current"
 	PoolConnIdleCurrent  = "pool_conn_idle_current"
 	PoolConnStaleTotal   = "pool_conn_stale_total"
-
-	meterRequestTotal               = "request_total"
-	meterRequestLatencyMicroseconds = "latency_microseconds"
-	meterRequestDurationSeconds     = "request_duration_seconds"
 )
 
 type Statser interface {
