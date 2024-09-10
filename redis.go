@@ -244,26 +244,22 @@ func (b *Broker) Subscribe(ctx context.Context, topic string, handler broker.Han
 func (b *Broker) configure() error {
 	redisOptions := DefaultOptions
 
-	if b.cli != nil && b.opts.Context == nil {
-		return nil
+	if b.opts.Context != nil {
+		if c, ok := b.opts.Context.Value(configKey{}).(*redis.UniversalOptions); ok && c != nil {
+			redisOptions = c
+		}
 	}
 
-	if b.opts.Context != nil {
-		if c, ok := b.opts.Context.Value(configKey{}).(*redis.UniversalOptions); ok {
-			redisOptions = c
-			if b.opts.TLSConfig != nil {
-				redisOptions.TLSConfig = b.opts.TLSConfig
-			}
-		}
+	if len(b.opts.Addrs) > 0 {
+		redisOptions.Addrs = b.opts.Addrs
+	}
+
+	if b.opts.TLSConfig != nil {
+		redisOptions.TLSConfig = b.opts.TLSConfig
 	}
 
 	if redisOptions == nil && b.cli != nil {
 		return nil
-	}
-
-	if redisOptions == nil {
-		redisOptions.Addrs = b.opts.Addrs
-		redisOptions.TLSConfig = b.opts.TLSConfig
 	}
 
 	c := redis.NewUniversalClient(redisOptions)
