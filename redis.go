@@ -230,13 +230,12 @@ func (b *Broker) Subscribe(ctx context.Context, topic string, handler broker.Han
 		done:   make(chan struct{}),
 	}
 
-	// Run the receiver routine.
-	go s.loop()
-
 	s.sub = b.cli.Subscribe(s.ctx, s.topic)
 	if err := s.sub.Ping(ctx, ""); err != nil {
 		return nil, err
 	}
+
+	go s.loop()
 
 	return s, nil
 }
