@@ -264,6 +264,7 @@ func (b *Broker) configure() error {
 	c := redis.NewUniversalClient(redisOptions)
 	setTracing(c, b.opts.Tracer)
 
+	b.cli = c
 	b.statsMeter()
 
 	return nil
