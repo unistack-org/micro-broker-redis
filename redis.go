@@ -225,6 +225,7 @@ func (b *Broker) BatchSubscribe(ctx context.Context, topic string, handler broke
 // Subscribe returns a broker.Subscriber for the topic and handler
 func (b *Broker) Subscribe(ctx context.Context, topic string, handler broker.Handler, opts ...broker.SubscribeOption) (broker.Subscriber, error) {
 	s := &Subscriber{
+		ctx:    ctx,
 		topic:  topic,
 		handle: handler,
 		opts:   b.opts,
