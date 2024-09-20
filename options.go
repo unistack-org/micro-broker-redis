@@ -45,16 +45,11 @@ func NewOptions(opts ...Option) Options {
 		Meter:              meter.DefaultMeter,
 		Tracer:             tracer.DefaultTracer,
 		MeterStatsInterval: DefaultMeterStatsInterval,
-		MeterMetricPrefix:  DefaultMeterMetricPrefix,
 	}
 
 	for _, o := range opts {
 		o(&options)
 	}
-
-	options.Meter = options.Meter.Clone(
-		meter.MetricPrefix(options.MeterMetricPrefix),
-	)
 
 	options.Logger = options.Logger.Clone(logger.WithCallerSkipCount(1))
 
