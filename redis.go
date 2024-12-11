@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -152,9 +153,22 @@ func (s *Subscriber) Unsubscribe(ctx context.Context) error {
 
 // Broker implements broker.Broker interface
 type Broker struct {
-	opts broker.Options
-	cli  redis.UniversalClient
-	done chan struct{}
+	opts      broker.Options
+	cli       redis.UniversalClient
+	done      chan struct{}
+	connected *atomic.Uint32
+}
+
+func (b *Broker) Live() bool {
+	return b.connected.Load() == 1
+}
+
+func (b *Broker) Ready() bool {
+	return b.connected.Load() == 1
+}
+
+func (b *Broker) Health() bool {
+	return b.connected.Load() == 1
 }
 
 // String returns the name of the broker implementation
@@ -243,7 +257,11 @@ func (b *Broker) Subscribe(ctx context.Context, topic string, handler broker.Han
 	return s, nil
 }
 
-func (b *Broker) configure() error {
+func (b *Broker) configure(opts ...broker.Option) error {
+	if b.connected.Load() == 1 && len(opts) == 0 {
+		return nil
+	}
+
 	redisOptions := DefaultOptions
 
 	if b.opts.Context != nil {
@@ -260,10 +278,6 @@ func (b *Broker) configure() error {
 		redisOptions.TLSConfig = b.opts.TLSConfig
 	}
 
-	if redisOptions == nil && b.cli != nil {
-		return nil
-	}
-
 	c := redis.NewUniversalClient(redisOptions)
 	setTracing(c, b.opts.Tracer)
 
@@ -274,6 +288,9 @@ func (b *Broker) configure() error {
 }
 
 func (b *Broker) Connect(ctx context.Context) error {
+	if b.connected.Load() == 1 {
+		return nil
+	}
 	var err error
 	if b.cli != nil {
 		err = b.cli.Ping(ctx).Err()
@@ -284,15 +301,10 @@ func (b *Broker) Connect(ctx context.Context) error {
 }
 
 func (b *Broker) Init(opts ...broker.Option) error {
-	for _, o := range opts {
-		o(&b.opts)
-	}
-
-	err := b.configure()
+	err := b.configure(opts...)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -304,6 +316,9 @@ func (b *Broker) Client() redis.UniversalClient {
 }
 
 func (b *Broker) Disconnect(ctx context.Context) error {
+	if b.connected.Load() == 0 {
+		return nil
+	}
 	var err error
 	select {
 	case <-b.done:
@@ -318,5 +333,5 @@ func (b *Broker) Disconnect(ctx context.Context) error {
 }
 
 func NewBroker(opts ...broker.Option) *Broker {
-	return &Broker{opts: broker.NewOptions(opts...)}
+	return &Broker{connected: &atomic.Uint32{}, opts: broker.NewOptions(opts...)}
 }
