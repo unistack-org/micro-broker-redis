@@ -11,7 +11,7 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	go.unistack.org/micro-proto/v3 v3.4.1 // indirect
 	google.golang.org/protobuf v1.35.2 // indirect
 )
